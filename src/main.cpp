@@ -65,6 +65,7 @@ public:
 
 	shared_ptr<Texture> sidewalkTexture;
 
+<<<<<<< Updated upstream
 	shared_ptr<Texture> skyTexture;
 
 	shared_ptr<Texture> monitor1Texture;
@@ -90,6 +91,9 @@ public:
 	Animation *stickfigure_anim;
 
 	Animation *stickfigure_idle;
+=======
+	AssimpModel *cube, *barrel, *wizard_hat;
+>>>>>>> Stashed changes
 
 	Animator *stickfigure_animator;
 
@@ -276,13 +280,9 @@ public:
 
 			phi = phi - deltaY * sensitivity;
 
-			// if (phi > radians(-10.0f))
-			// {
-			// 	phi = radians(-10.0f);
-			// }
-			if (phi > radians(80.0f))
+			if (phi > radians(-10.0f))
 			{
-				phi = radians(80.0f);
+				phi = radians(-10.0f);
 			}
 			if (phi < radians(-80.0f))
 			{
@@ -364,7 +364,11 @@ public:
 	{
 		GLSL::checkVersion();
 
+<<<<<<< Updated upstream
 		// Set background color.
+=======
+		// Set background color and enable z-buffer test
+>>>>>>> Stashed changes
 		glClearColor(.12f, .34f, .56f, 1.0f);
 		// Enable z-buffer test.
 		glEnable(GL_DEPTH_TEST);
@@ -566,6 +570,7 @@ public:
 
 	}
 
+<<<<<<< Updated upstream
 	unsigned int createSky(string dir, vector<string> faces) {
 		unsigned int textureID;
 		glGenTextures(1, &textureID);
@@ -590,6 +595,21 @@ public:
 		// cout << " creating cube map any errors : " << glGetError() << endl;
 		return textureID;
 	}
+=======
+		wizard_hat = new AssimpModel(resourceDirectory + "/Wizardhat/hat_LP.obj");
+
+		wizard_hat->assignTexture("texture_diffuse1", resourceDirectory + "/Wizardhat/textures/diffuse.png");
+		wizard_hat->assignTexture("texture_roughness1", resourceDirectory + "/Wizardhat/textures/roughness.png");
+		wizard_hat->assignTexture("texture_normal1", resourceDirectory + "/Wizardhat/textures/normal.png");
+
+
+
+		// add 2 instances of the barrel to the collectibles vector Collectible(<model>, <position>)
+		collectibles.push_back(Collectible(barrel, vec3(3.0f, 0.0f, 1.0f)));
+		collectibles.push_back(Collectible(barrel, vec3(-2.0f, 0.0f, 2.0f)));
+		collectibles.push_back(Collectible(wizard_hat, vec3(-10.0f, -4.0f, -2.0f)));
+		collectibles.push_back(Collectible(wizard_hat, vec3(10.0f, -4.0f, -2.0f)));
+>>>>>>> Stashed changes
 
 	void SetMaterialMonitor(shared_ptr<Program> curS) {
 		glUniform3f(curS->getUniform("MatAmb"), 0.7f, 0.7f, 0.7f); // silver ambient
