@@ -2,3 +2,4 @@ build/
 x64/
 .vs/
 ext/assimp/
+.DS_Store

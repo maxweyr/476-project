@@ -7,18 +7,17 @@
 
 class Entity {
     private:
-        AssimpModel *model;
-        Texture *texture;
         glm::vec3 position;
         float hitpoints;
         float moveSpeed;
 
     public:
-        Entity(AssimpModel* model, Texture *texture, const glm::vec3& position, float hitpoints, float moveSpeed);
+        Entity(const glm::vec3& position, float hitpoints, float moveSpeed);
 
         glm::vec3 getPosition() const;
-        void setPosition(const glm::vec3& pos);
+        void setPosition(const glm::vec3 pos);
         void takeDamage(float damage);
+        void move(const glm::vec3& direction);
         bool isAlive() const;
 
 };

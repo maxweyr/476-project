@@ -5,7 +5,9 @@
 
 class Enemy : public Entity {
     public:
-        Enemy(AssimpModel* model, Texture *texture, const glm::vec3& position, float hitpoints, float moveSpeed);
+        Enemy(const glm::vec3& position, float hitpoints, float moveSpeed);
+
+        void attack();
 };
 
 #endif // ENEMY_H

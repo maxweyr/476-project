@@ -1,4 +1,4 @@
 #include "Enemy.h"
 
-Enemy::Enemy(AssimpModel* model, Texture *texture, const glm::vec3& position, float hitpoints, float moveSpeed)
-            : Entity(model, texture, position, hitpoints, moveSpeed) {}
+Enemy::Enemy(const glm::vec3& position, float hitpoints, float moveSpeed)
+            : Entity(position, hitpoints, moveSpeed) {}

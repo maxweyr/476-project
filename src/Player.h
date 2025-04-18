@@ -4,30 +4,51 @@
 #include "Entity.h"
 #include "Spell.h"
 
+#define INVENTORY_SIZE 8
+
 typedef enum {
-    SLOT_ONE,
-    SLOT_TWO
+    SLOT_LEFT,
+    SLOT_RIGHT,
+    SLOT_INV_ONE,
+    SLOT_INV_TWO,
+    SLOT_INV_THREE,
+    SLOT_INV_FOUR,
+    SLOT_INV_FIVE,
+    SLOT_INV_SIX
 } SpellSlot;
 
 class Player : public Entity {
     private:
         Spell *currentSpell;
 
-        // Init spell inventory with two empty slots
-        Spell spellInventory[MAX_SPELLS] = {
-            Spell(SpellType::NO_SPELL, 0, 0, 0, 0, SpellType::NO_SPELL),
-            Spell(SpellType::NO_SPELL, 0, 0, 0, 0, SpellType::NO_SPELL)
+        // Init spell inventory with empty slots
+        Spell spellInventory[INVENTORY_SIZE] = {
+            Spell("Empty", SpellType::NO_SPELL, 0, 0, 0, 0, SpellType::NO_SPELL),
+            Spell("Empty", SpellType::NO_SPELL, 0, 0, 0, 0, SpellType::NO_SPELL),
+            Spell("Empty", SpellType::NO_SPELL, 0, 0, 0, 0, SpellType::NO_SPELL),
+            Spell("Empty", SpellType::NO_SPELL, 0, 0, 0, 0, SpellType::NO_SPELL),
+            Spell("Empty", SpellType::NO_SPELL, 0, 0, 0, 0, SpellType::NO_SPELL),
+            Spell("Empty", SpellType::NO_SPELL, 0, 0, 0, 0, SpellType::NO_SPELL),
+            Spell("Empty", SpellType::NO_SPELL, 0, 0, 0, 0, SpellType::NO_SPELL),
+            Spell("Empty", SpellType::NO_SPELL, 0, 0, 0, 0, SpellType::NO_SPELL)
         };
 
-        SpellSlot currentSpellSlot;
+        SpellSlot activeSpellSlot;
+        bool sprintFlag;
+        bool dodgeFlag;
 
     public:
-        Player(AssimpModel* model, Texture *texture, const glm::vec3& position, float hitpoints, float moveSpeed);
+        Player(const glm::vec3& position, float hitpoints, float moveSpeed);
 
-        SpellSlot getCurrentSpellSlot();
+        void move(const glm::vec3& direction);
+        SpellSlot getActiveSpellSlot();
         void setCurrentSpellSlot(SpellSlot slot);
-        void equipSpell(Spell *spell, int spellSlot);
+        Spell getSpellFromSpellSlot(SpellSlot slot);
+        void pickupSpell(Spell *spell, SpellSlot activeSpellSlot);
         void castSpell();
+        void setSprintFlag(bool flag);
+        void dodge();
+        bool isInventoryFull();
 };
 
 void initPlayer();

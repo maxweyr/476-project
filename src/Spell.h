@@ -1,7 +1,11 @@
 #ifndef SPELL_H
 #define SPELL_H
 
-#define MAX_SPELLS 2
+#include <iostream>
+#include <string>
+#include <glad/glad.h>
+
+using namespace std;
 
 typedef enum {
     NO_SPELL,
@@ -12,6 +16,7 @@ typedef enum {
 
 class Spell {
     private:
+        std::string name;
         SpellType type;
         float damage;
         float fireRate;
@@ -20,9 +25,9 @@ class Spell {
         SpellType weakness;
 
     public:
-        Spell(SpellType type, float damage, float fireRate, float range, float cooldown, SpellType weakness)
-            : type(type), damage(damage), fireRate(fireRate), range(range), cooldown(cooldown), weakness(weakness) {}
+        Spell(std::string name, SpellType type, float damage, float fireRate, float range, float cooldown, SpellType weakness);
         void cast();
+        SpellType getType();
 };
 
 void initSpells();

@@ -1,13 +1,13 @@
 #include "Entity.h"
 
-Entity::Entity(AssimpModel* model, Texture *texture, const glm::vec3& position, float hitpoints, float moveSpeed)
-        : model(model), texture(texture), position(position), hitpoints(hitpoints), moveSpeed(moveSpeed) {};
+Entity::Entity(const glm::vec3& position, float hitpoints, float moveSpeed)
+        : position(position), hitpoints(hitpoints), moveSpeed(moveSpeed) {};
 
 glm::vec3 Entity::getPosition() const {
     return position;
 }
 
-void Entity::setPosition(const glm::vec3& pos) {
+void Entity::setPosition(const glm::vec3 pos) {
     position = pos;
 }
 
@@ -24,4 +24,9 @@ void Entity::takeDamage(float damage) {
 
 bool Entity::isAlive() const {
     return hitpoints > 0;
+}
+
+void Entity::move(const glm::vec3& direction) {
+    position += direction * moveSpeed;
+    // Add any additional logic for movement (e.g., collision detection)
 }
