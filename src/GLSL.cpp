@@ -11,6 +11,7 @@
 #include <cstring>
 #include <cassert>
 
+
 namespace GLSL
 {
 
@@ -74,10 +75,10 @@ void printShaderInfoLog(GLuint shader)
 			exit(1);
 		}
 
-		GLint charsWritten  = 0;
+		GLint charsWritten = 0;
 		CHECKED_GL_CALL(glGetShaderInfoLog(shader, infologLength, &charsWritten, infoLog));
 		printf("Shader InfoLog:\n%s\n\n", infoLog);
-		delete [] infoLog;
+		delete[] infoLog;
 	}
 }
 
@@ -97,10 +98,10 @@ void printProgramInfoLog(GLuint program)
 			exit(1);
 		}
 
-		GLint charsWritten  = 0;
+		GLint charsWritten = 0;
 		CHECKED_GL_CALL(glGetProgramInfoLog(program, infologLength, &charsWritten, infoLog));
 		printf("Program InfoLog:\n%s\n\n", infoLog);
-		delete [] infoLog;
+		delete[] infoLog;
 	}
 }
 
@@ -126,7 +127,7 @@ GLint getAttribLocation(const GLuint program, const char varname[], bool verbose
 	GLint r = glGetAttribLocation(program, varname);
 	if (r < 0 && verbose)
 	{
-		std::cerr << "WARN: "<< varname << " cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it.\n" << std::endl;
+		std::cerr << "WARN: " << varname << " cannot be bound (it either doesn't exist or has been optimized away). safe_glAttrib calls will silently ignore it.\n" << std::endl;
 	}
 	return r;
 }
@@ -137,7 +138,7 @@ GLint getUniformLocation(const GLuint program, const char varname[], bool verbos
 	GLint r = glGetUniformLocation(program, varname);
 	if (r < 0 && verbose)
 	{
-		std::cerr << "WARN: "<< varname << " cannot be bound (it either doesn't exist or has been optimized away). safe_glUniform calls will silently ignore it.\n" << std::endl;
+		std::cerr << "WARN: " << varname << " cannot be bound (it either doesn't exist or has been optimized away). safe_glUniform calls will silently ignore it.\n" << std::endl;
 	}
 	return r;
 }

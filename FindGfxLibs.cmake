@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10...3.23)
+cmake_minimum_required(VERSION 3.4)
 
 # findGLFW helper function
 function(_findGLFW3_vsbinary target)
@@ -17,11 +17,11 @@ function(_findGLFW3_vsbinary target)
         endif()
         set(GLFW_LIBRARIES "${GLFW_DIR}/lib-vc${version}/glfw3.lib" PARENT_SCOPE)
     endfunction()
-	
-	if(MSVC_VERSION GREATER_EQUAL 1930)
+
+    if(MSVC_VERSION GREATER_EQUAL 1930)
 		addMSVCPreCompiled("2022")
 	elseif(MSVC_VERSION GREATER_EQUAL 1920)
-		addMSVCPreCompiled("2019")
+        addMSVCPreCompiled("2019")
     elseif(MSVC_VERSION GREATER_EQUAL 1910)
         addMSVCPreCompiled("2017")
     elseif(MSVC_VERSION GREATER_EQUAL 1900)
