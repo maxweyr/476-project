@@ -1739,6 +1739,11 @@ void drawOrbs(shared_ptr<Program> simpleShader, shared_ptr<MatrixStack> Model) {
 
 				if (checkAABBCollision(proj.aabbMin, proj.aabbMax, enemy->getAABBMin(), enemy->getAABBMax())) {
 					cout << "[DEBUG] Spell HIT enemy!" << endl;
+					
+					if (!enemy->isHit()) {
+						enemy->setHit(true); // Mark enemy as hit
+					}
+
 					enemy->takeDamage(damageAmount);
 					proj.active = false; // Deactivate projectile
 					break; // Hit one enemy
@@ -1817,6 +1822,55 @@ void drawOrbs(shared_ptr<Program> simpleShader, shared_ptr<MatrixStack> Model) {
 		healthBar->Draw(hudProg);
 		hudProg->unbind();
 	}
+
+	void drawEnemyHealthBars(glm::mat4 viewMatrix, glm::mat4 projMatrix) {
+		float healthBarWidth = 100.0f;
+		float healthBarHeight = 10.0f;
+		float healthBarOffsetY = 15.0f;  // Offset above enemy head
+		
+		int screenWidth, screenHeight;
+		glfwGetFramebufferSize(windowManager->getHandle(), &screenWidth, &screenHeight);
+	
+		glm::mat4 hudProjection = glm::ortho(0.0f, (float)screenWidth, 0.0f, (float)screenHeight, -1.0f, 1.0f);
+	
+		for (auto* enemy : enemies) {
+			if (!enemy || !enemy->isAlive() || (!enemy->isHit())) continue;
+	
+			glm::vec3 enemyWorldPos = enemy->getAABBMax(); // Top position in world coordinates
+	
+			// Transform enemy position to clip space
+			glm::vec4 clipSpacePos = projMatrix * viewMatrix * glm::vec4(enemyWorldPos, 1.0f);
+	
+			// If enemy is behind camera, skip
+			if (clipSpacePos.w <= 0) continue;
+	
+			// Perspective divide (NDC)
+			glm::vec3 ndcPos = glm::vec3(clipSpacePos) / clipSpacePos.w;
+	
+			// Convert NDC (-1 to 1) to screen coordinates
+			glm::vec2 screenPos;
+			screenPos.x = (ndcPos.x * 0.5f + 0.5f) * screenWidth;
+			screenPos.y = (ndcPos.y * 0.5f + 0.5f) * screenHeight;
+	
+			// Offset above enemy's head
+			screenPos.y += healthBarOffsetY;
+	
+			// Set HUD Model matrix
+			glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(screenPos.x - (healthBarWidth / 2.0f), screenPos.y, 0.0f));
+			model = glm::scale(model, glm::vec3(healthBarWidth, healthBarHeight, 1.0f));
+	
+			hudProg->bind();
+			glUniformMatrix4fv(hudProg->getUniform("projection"), 1, GL_FALSE, glm::value_ptr(hudProjection));
+			glUniformMatrix4fv(hudProg->getUniform("model"), 1, GL_FALSE, glm::value_ptr(model));
+			glUniform1f(hudProg->getUniform("healthPercent"), enemy->getHitpoints() / ENEMY_HP_MAX);
+			glUniform1f(hudProg->getUniform("BarStartX"), screenPos.x - (healthBarWidth / 2.0f));
+			glUniform1f(hudProg->getUniform("BarWidth"), healthBarWidth);
+	
+			healthBar->Draw(hudProg);
+			hudProg->unbind();
+		}
+	}
+	
 	
 
 	void render(float frametime, float animTime) {
@@ -1948,6 +2002,7 @@ void drawOrbs(shared_ptr<Program> simpleShader, shared_ptr<MatrixStack> Model) {
 
 		#if SHOW_HEALTHBAR
 		drawHealthBar();
+		drawEnemyHealthBars(View->topMatrix(), Projection->topMatrix());
 		#endif
 
 		// --- Cleanup ---

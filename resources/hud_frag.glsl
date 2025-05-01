@@ -14,6 +14,6 @@ void main() {
     if (screenX > cutoffX) {
         FragColor = vec4(0.0, 0.0, 0.0, 1.0); // black (empty health)
     } else {
-        FragColor = vec4(1.0, 0.0, 0.0, 1.0); // red (filled health)
+        FragColor = vec4(0.541, 0.145, 0.145, 1.0); // red (filled health)
     }
 }
