@@ -660,6 +660,11 @@ public:
 			ShadowProg->addUniform("finalBonesMatrices[" + to_string(i) + "]");
 		}
 
+		ShadowProg->addUniform("pawCount");
+		ShadowProg->addUniform("pawData");
+		ShadowProg->addUniform("pawTex");
+		ShadowProg->addUniform("curTime");
+
 		ShadowProg->bind();
 		GLint loc = ShadowProg->getUniform("uMaps");
 		GLint units[6] = { 0,1,2,3,4,5 };
@@ -743,6 +748,12 @@ public:
 		particleAlphaTex->init();
 		particleAlphaTex->setUnit(0);
 		particleAlphaTex->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+		pawTex = make_shared<Texture>();
+		pawTex->setFilename(resourceDirectory + "/paw_print.png");
+		pawTex->init();
+		pawTex->setUnit(11); // Using texture unit 11 for paw prints
+		pawTex->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 		// Initialize particle system
 		particleSystem = make_shared<particleGen>(vec3(0.0f), 0.0f, 0.2f, 0.6f, 0.8f, 0.8f, 1.0f, 0.1f, 0.2f);
@@ -3450,6 +3461,7 @@ public:
 		// characterMovement.y = groundY; // Ensure Y stays correct
 
 		player->setPosition(vec3(allowedPos.x, groundY, allowedPos.z)); // Update player position
+		onStep(player->getPosition(), player->getRotY());
 
 		// Update camera based on final position (done in render)
 		// return characterMovement; // Return the final, potentially adjusted, position
@@ -5022,7 +5034,34 @@ public:
 			setCameraViewFromStack(ShadowProg, View);
 			LSpace = LO * LV;
 			glUniformMatrix4fv(ShadowProg->getUniform("LV"), 1, GL_FALSE, value_ptr(LSpace)); // Set light space matrix
+
+			// Set paw print uniforms
+			if (ShadowProg->hasUniform("pawTex")) {
+				glActiveTexture(GL_TEXTURE11); // Use texture unit 11
+				glBindTexture(GL_TEXTURE_2D, pawTex->getID());
+				glUniform1i(ShadowProg->getUniform("pawTex"), 11);
+			}
+			if (ShadowProg->hasUniform("curTime")) {
+				glUniform1f(ShadowProg->getUniform("curTime"), (float)glfwGetTime());
+			}
+
+			int numPrints = static_cast<int>(prints.size());
+			if (ShadowProg->hasUniform("pawCount")) {
+				glUniform1i(ShadowProg->getUniform("pawCount"), numPrints);
+			}
+
+			for (int i = 0; i < numPrints && i < Config::PRINTS_MAX; ++i) {
+				std::string uName = "pawData[" + std::to_string(i) + "]";
+				if (ShadowProg->hasUniform(uName)) {
+					glm::vec4 dataToSend = glm::vec4(prints[i].pos.x, prints[i].pos.y, prints[i].angle, prints[i].spawnTime);
+					glUniform4fv(ShadowProg->getUniform(uName), 1, glm::value_ptr(dataToSend));
+				}
+			}
+
 			drawMainScene(ShadowProg, Model, animTime); // Draw the entire scene with shadows
+			// After drawing, unbind the texture from the unit
+			glActiveTexture(GL_TEXTURE11);
+			glBindTexture(GL_TEXTURE_2D, 0);
 			ShadowProg->unbind();
 		}
 
