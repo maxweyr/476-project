@@ -5429,12 +5429,41 @@ public:
 			}
 			else if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
 				currentSpellSlotIndex = (currentSpellSlotIndex - 1 + 4) % 4;
-				cout << "Current Spell: " << currentSpellSlotIndex << endl;
+
+				string spellName = "";
+
+				if (currentSpellSlotIndex == 0) {
+					spellName = "Fireball";
+				}
+				else if (currentSpellSlotIndex == 1) {
+					spellName = "Ice Shard";
+				}
+				else if (currentSpellSlotIndex == 2) {
+					spellName = "Lightning Bolt";
+				}
+				else if (currentSpellSlotIndex == 3) {
+					spellName = "Heal";
+				}
+
+				cout << "Current Spell: " << spellName << endl;
 				currentPlayerSpellType = spellSlots[currentSpellSlotIndex];
 			}
 			else if (key == GLFW_KEY_E && action == GLFW_PRESS) {
 				currentSpellSlotIndex = (currentSpellSlotIndex + 1) % 4;
-				cout << "Current Spell: " << currentSpellSlotIndex << endl;
+				string spellName = "";
+				if (currentSpellSlotIndex == 0) {
+					spellName = "Fireball";
+				}
+				else if (currentSpellSlotIndex == 1) {
+					spellName = "Ice Shard";
+				}
+				else if (currentSpellSlotIndex == 2) {
+					spellName = "Lightning Bolt";
+				}
+				else if (currentSpellSlotIndex == 3) {
+					spellName = "Heal";
+				}
+				cout << "Current Spell: " << spellName << endl;
 				currentPlayerSpellType = spellSlots[currentSpellSlotIndex];
 			}
 		}
