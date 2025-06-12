@@ -62,7 +62,6 @@ ma_sound key_unlock_sound;
 
 class Application : public EventCallbacks {
 public:
-
 	std::shared_ptr<Player> player;
 	WindowManager * windowManager = nullptr;
 
@@ -81,17 +80,6 @@ public:
 	shared_ptr<Program> SkyboxProg;
 	shared_ptr<Program> debugLineProg;
 	shared_ptr<Program> textProg;
-
-	std::vector<ColorFilter> colorFilters = {
-    { "Classic",   glm::vec4(1.0f, 1.0f, 1.0f, 0.0f) }, // No filter
-    { "Cool Blue", glm::vec4(0.5f, 0.6f, 1.0f, 0.3f) },
-    { "Warm Gold", glm::vec4(1.0f, 0.85f, 0.6f, 0.25f) },
-    { "Toxic Green", glm::vec4(0.7f, 1.0f, 0.7f, 0.3f) },
-    { "Shadow Purple", glm::vec4(0.8f, 0.6f, 1.0f, 0.3f) },
-    { "Blood Red", glm::vec4(1.0f, 0.4f, 0.4f, 0.3f) },
-	};
-
-	glm::vec4 currentColorFilter = colorFilters[0].tintColor; // Default to "Classic"
 
 	// ground data - Reused for all flat ground planes
 	GLuint GrndBuffObj = 0, GrndNorBuffObj = 0, GIndxBuffObj = 0; // Initialize to 0
@@ -341,8 +329,8 @@ public:
 	};
 
 	GameState gameState = GameState::TITLE_SCREEN;
-  
-	int currentSpellSlotIndex = 0; // Current spell type in use
+
+	int currentSpellSlotIndex = 1; // Current spell type in use
 	SpellType currentPlayerSpellType = spellSlots[currentSpellSlotIndex]; // Player starts with Fire spell by default
 
 	std::vector<LocksOnDoor> lockOnDoors;
@@ -774,7 +762,6 @@ public:
 		redFlashProg->addUniform("projection");
 		redFlashProg->addUniform("model");
 		redFlashProg->addUniform("alpha");
-		redFlashProg->addUniform("color");
 
 		SkyboxProg->addUniform("P");
 		SkyboxProg->addUniform("V");
@@ -943,7 +930,7 @@ public:
 					case CT::ONLY_CHEST: addInstance(chestMatrices); break;
 					case CT::ONLY_TABLE:
 						addInstance(table_chairs1Matrices);
-						addLibGrnd(5.0f, 5.0f, 1.0f, vec3(i, libraryCenter.y +0.01f, j), carpetTex);
+						addLibGrnd(5.0f, 5.0f, 1.0f, vec3(i, libraryCenter.y + 0.1f, j), carpetTex);
 						break;
 					case CT::ONLY_CLOCK: addInstance(clockMatrices); break;
 					case CT::ONLY_BOOKSTAND: addInstance(bookstandMatrices); break;
@@ -955,7 +942,7 @@ public:
 							case OT::TABLE_AND_CHAIR1:
 							case OT::TABLE_AND_CHAIR2:
 								addInstance(table_chairs1Matrices);
-								addLibGrnd(5.0f, 5.0f, 1.0f, vec3(i, libraryCenter.y +0.01f, j), carpetTex);
+								addLibGrnd(5.0f, 5.0f, 1.0f, vec3(i, libraryCenter.y + 0.1f, j), carpetTex);
 								break;
 							case OT::CHEST: addInstance(chestMatrices); break;
 							case OT::CANDELABRA: addInstance(candelabraMatrices); break;
@@ -1286,7 +1273,7 @@ public:
 		book_shelf2->assignTexture("texture_diffuse", resourceDirectory + "/cluster_assets/glowing_bookshelf_bake_diffuse.png");
 
 		candelabra = new AssimpModel(resourceDirectory + "/cluster_assets/candelabrum/Candelabrum.obj");
-		candelabra->assignTexture("texture_diffuse", resourceDirectory + "/cluster_assets/candelabrum/textures/defaultobject_gold.jpg");
+		candelabra->assignTexture("texture_diffuse", resourceDirectory + "/cluster_assets/candelabrum/textures/defaultobject_gloss.png");
 		candelabra->assignTexture("texture_specular", resourceDirectory + "/cluster_assets/candelabrum/textures/defaultobject_specular.png");
 		candelabra->assignTexture("texture_normal", resourceDirectory + "/cluster_assets/candelabrum/textures/defaultobject_normal.png");
 
@@ -1470,36 +1457,6 @@ public:
 				glUniform1f(shader->getUniform("MatMetal"), 1.0f);
 				glUniform3f(shader->getUniform("MatEmit"), 0.9f, 0.8f, 0.2f);
 				break;
-			case Material::orb_glowing_green:
-				glUniform3f(shader->getUniform("MatAlbedo"), 0.1f, 0.5f, 0.1f);
-				glUniform1f(shader->getUniform("MatRough"), 1.0f);
-				glUniform1f(shader->getUniform("MatMetal"), 1.0f);
-				glUniform3f(shader->getUniform("MatEmit"), 0.2f, 0.9f, 0.2f);
-				break;
-			case Material::orb_highlight_red:
-				glUniform3f(shader->getUniform("MatAlbedo"), 0.8f, 0.1f, 0.1f);
-				glUniform1f(shader->getUniform("MatRough"), 0.5f);
-				glUniform1f(shader->getUniform("MatMetal"), 0.0f);
-				glUniform3f(shader->getUniform("MatEmit"), 0.0f, 0.0f, 0.0f);
-				break;
-			case Material::orb_highlight_blue:
-				glUniform3f(shader->getUniform("MatAlbedo"), 0.1f, 0.1f, 0.8f);
-				glUniform1f(shader->getUniform("MatRough"), 0.5f);
-				glUniform1f(shader->getUniform("MatMetal"), 0.0f);
-				glUniform3f(shader->getUniform("MatEmit"), 0.0f, 0.0f, 0.0f);
-				break;
-			case Material::orb_highlight_yellow:
-				glUniform3f(shader->getUniform("MatAlbedo"), 0.8f, 0.8f, 0.1f);
-				glUniform1f(shader->getUniform("MatRough"), 0.5f);
-				glUniform1f(shader->getUniform("MatMetal"), 0.0f);
-				glUniform3f(shader->getUniform("MatEmit"), 0.0f, 0.0f, 0.0f);
-				break;
-			case Material::orb_highlight_green:
-				glUniform3f(shader->getUniform("MatAlbedo"), 0.1f, 0.8f, 0.1f);
-				glUniform1f(shader->getUniform("MatRough"), 0.5f);
-				glUniform1f(shader->getUniform("MatMetal"), 0.0f);
-				glUniform3f(shader->getUniform("MatEmit"), 0.0f, 0.0f, 0.0f);
-				break;
 			case Material::grey:
 				glUniform3f(shader->getUniform("MatAlbedo"), 0.8f, 0.8f, 0.8f);
 				glUniform1f(shader->getUniform("MatRough"), 0.6f);
@@ -1546,12 +1503,6 @@ public:
 				glUniform3f(shader->getUniform("MatAlbedo"), 1.0f, 0.766f, 0.336f);
 				glUniform1f(shader->getUniform("MatRough"), 0.2f);
 				glUniform1f(shader->getUniform("MatMetal"), 1.0f);
-				glUniform3f(shader->getUniform("MatEmit"), 0.0f, 0.0f, 0.0f);
-				break;
-			case Material:: player_green: //add this to main
-				glUniform3f(shader->getUniform("MatAlbedo"), 0.35f, 0.914f, 0.4f);
-				glUniform1f(shader->getUniform("MatRough"), 0.8f);
-				glUniform1f(shader->getUniform("MatMetal"), 0.0f);
 				glUniform3f(shader->getUniform("MatEmit"), 0.0f, 0.0f, 0.0f);
 				break;
 		}
@@ -2275,23 +2226,12 @@ public:
 				orb.collected = true;
 				// orb.state = OrbState::COLLECTED; // Optionally set state
 
-				bool allSpellsEmpty = true;
-				for (int i = 0; i < 4; i++) {
-					if (spellCounts[spellSlots[i]] != 0) {
-						allSpellsEmpty = false;
-						break;
-					}
-				}
-				if (allSpellsEmpty) {
-					currentPlayerSpellType = orb.spellType; // Equip the collected spell type
-
-					for (int i = 0; i < 4; i++) {
-						if (spellSlots[i] == currentPlayerSpellType) {
-							currentSpellSlotIndex = i; // Set the current spell slot index
-							break;
-						}
-					}
-				}
+				// for (int i = 0; i < 4; i++) {
+				// 	if (orb.spellType == spellSlots[i]) {
+				// 		currentSpellSlotIndex = i;
+				// 		break;
+				// 	}
+				// }
 
 				// currentPlayerSpellType = spellSlots[currentSpellSlotIndex]; // Equip the collected spell type
 				// orbsCollectedCount++; // This might now just mean "spell charges" or be repurposed
@@ -2389,7 +2329,7 @@ public:
 			float fireSideOffset = 0.15f;
 			float iceSideOffset = 0.30f;
 			float lightningSideOffset = 0.0f;
-			float healSideOffset = 0.45f;
+			float healSideOffset = 0.4f;
 
 			static std::map<SpellType, float> sideOffsets = {
 				{ SpellType::FIRE, fireSideOffset },
@@ -2402,7 +2342,7 @@ public:
 				// Calculate position behind the player (same logic as before)
 				float backOffset = 0.4f;
 				float upOffsetBase = 0.6f;
-				float stackOffset = orb.scale * 1.5f;
+				float stackOffset = orb.scale * 2.5f;
 				float sideOffset = sideOffsets[orb.spellType];
 				glm::vec3 playerForward = normalize(manMoveDir);
 				glm::vec3 playerUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -2427,31 +2367,7 @@ public:
 				Model->loadIdentity();
 				Model->translate(currentDrawPosition);
 				Model->scale(currentDrawScale); // Use current scale
-
-				if (orb.spellType == currentPlayerSpellType && orb.collected) {
-					// SetMaterial(simpleShader, orb.color * 1.2f); // Highlight current spell type
-					
-					Material highlight = orb.color;
-					
-					switch (orb.spellType) {
-						case SpellType::ICE:
-							highlight = Material::orb_highlight_blue;
-							break;
-						case SpellType::FIRE:
-							highlight = Material::orb_highlight_red;
-							break;
-						case SpellType::LIGHTNING:
-							highlight = Material::orb_highlight_yellow;
-							break;
-						case SpellType::HEAL:
-							highlight = Material::orb_highlight_green;
-							break;
-					}
-
-					SetMaterial(simpleShader, highlight); // Highlight current spell type
-				} else {
-					SetMaterial(simpleShader, orb.color);
-				}
+				SetMaterial(simpleShader, orb.color);
 				setModel(simpleShader, Model);
 				orb.model->Draw(simpleShader);
 			} Model->popMatrix();
@@ -2549,12 +2465,6 @@ public:
 			bossRoomQuadTree->cleanup(); // Clean up the boss room quad tree
 			initQuadTree(); // Reinitialize the quad tree
 			keysneededToCollect = 0; // Reset key count
-
-			// Increase number of enemies based on time elapsed
-			float timeElapsed = glfwGetTime();
-			int additionalEnemies = static_cast<int>(timeElapsed / 60.0f); // Add 1 enemy for every 60 seconds
-
-			library->setNumEnemies(library->getNumEnemies() + additionalEnemies + 1);
 			initEnemies(); // Reinitialize enemies
 			bossActiveSpells.clear();
 			bossEnemy->resetPhase();
@@ -2564,11 +2474,6 @@ public:
 			unlock = false;
 			keyCollectibles.clear(); // Clear key collectibles
 			keysCollectedCount = 0;
-
-			// Generate random number between 1 and 7
-			int randomFilterIndex = rand() % (colorFilters.size()) + 1; // Random number between 1 and 5
-
-			currentColorFilter = colorFilters[randomFilterIndex].tintColor;
 			#if USE_INSTANCING
 			initInstancingMatrices();
 			#endif
@@ -2851,7 +2756,7 @@ public:
 							table_chairs1->Draw(shader);
 							Model->popMatrix();
 
-							addLibGrnd(5.0f, 5.0f, 1.0f, vec3(i, libraryCenter.y +0.01f, j), carpetTex);
+							addLibGrnd(5.0f, 5.0f, 1.0f, vec3(i, libraryCenter.y + 0.1f, j), carpetTex);
 						}
 						else if (grid[gridPos].clusterType == LibraryGen::ClusterType::ONLY_CLOCK) {
 							Model->pushMatrix();
@@ -2891,7 +2796,7 @@ public:
 								table_chairs1->Draw(shader);
 								Model->popMatrix();
 
-								addLibGrnd(5.0f, 5.0f, 1.0f, vec3(i, libraryCenter.y +0.01f, j), carpetTex);
+								addLibGrnd(5.0f, 5.0f, 1.0f, vec3(i, libraryCenter.y + 0.1f, j), carpetTex);
 
 							}
 							else if (grid[gridPos].objectType == LibraryGen::CellObjType::TABLE_AND_CHAIR1) {
@@ -2903,7 +2808,7 @@ public:
 								table_chairs1->Draw(shader);
 								Model->popMatrix();
 
-								addLibGrnd(5.0f, 5.0f, 1.0f, vec3(i, libraryCenter.y +0.01f, j), carpetTex);
+								addLibGrnd(5.0f, 5.0f, 1.0f, vec3(i, libraryCenter.y + 0.1f, j), carpetTex);
 							}
 							else if (grid[gridPos].objectType == LibraryGen::CellObjType::CANDELABRA) {
 								Model->pushMatrix();
@@ -3122,7 +3027,7 @@ public:
 				Model->loadIdentity(); // Reset the model matrix
 				Model->translate(bossPos);
 				Model->rotate(bossRotY, bossRotation); // Rotate the body to match the boss's rotation
-				Model->scale(vec3(0.8f, 0.8f, 0.8f));
+				Model->scale(vec3(1.3f, 0.8f, 1.0f));
 				// --- Draw Main Body (Pill Shape) ---
 				Model->pushMatrix();
 				{
@@ -3877,17 +3782,6 @@ public:
 					cout << "Spells remaining of this type: " << spellCounts[it->spellType] << endl;
 					orbsCollectedCount--;
 					orbCollectibles.erase(it);
-
-					if (spellCounts[currentPlayerSpellType] <= 0) {
-						for (int i = 0; i < 4; ++i) {
-							if (spellCounts[spellSlots[i]] > 0) {
-								currentPlayerSpellType = spellSlots[i];
-								currentSpellSlotIndex = i;
-								cout << "[DEBUG] Changed currentPlayerSpellType to " << static_cast<int>(currentPlayerSpellType) << endl;
-								break;
-							}
-						}
-					}
 					break;
 				}
 			}
@@ -4705,7 +4599,7 @@ public:
 		glUniform3f(curS->getUniform("MatDif"), 0.95f, 0.78f, 0.14f);
 		glUniform3f(curS->getUniform("MatSpec"), 0.3f, 0.3f, 0.3f);
 		glUniform1f(curS->getUniform("MatShine"), 8.0f);*/
-		SetMaterial(curS, Material::player_green);
+		SetMaterial(curS, Material::gold);
 		setModel(curS, Model);
 		//player_rig->Draw(curS);
 		sphere->Draw(curS);
@@ -5350,28 +5244,7 @@ public:
 		model = glm::scale(model, glm::vec3(screenWidth, screenHeight, 1.0f));
 		glUniformMatrix4fv(redFlashProg->getUniform("projection"), 1, GL_FALSE, value_ptr(proj));
 		glUniformMatrix4fv(redFlashProg->getUniform("model"), 1, GL_FALSE, value_ptr(model));
-		glUniform4fv(redFlashProg->getUniform("color"), 1, value_ptr(vec4(0.7f, 0.1f, 0.1f, alpha))); // Red color
 		glUniform1f(redFlashProg->getUniform("alpha"), alpha); // Red color with alpha
-
-		healthBar->Draw(redFlashProg);
-		redFlashProg->unbind();
-	}
-
-	void drawColorFilter() {
-		int screenWidth, screenHeight;
-		glfwGetFramebufferSize(windowManager->getHandle(), &screenWidth, &screenHeight);
-
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		// glDisable(GL_DEPTH_TEST);
-		redFlashProg->bind();
-
-		glm::mat4 proj = glm::ortho(0.0f, (float)screenWidth, 0.0f, (float)screenHeight, -1.0f, 1.0f);
-		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
-		model = glm::scale(model, glm::vec3(screenWidth, screenHeight, 1.0f));
-		glUniformMatrix4fv(redFlashProg->getUniform("projection"), 1, GL_FALSE, value_ptr(proj));
-		glUniformMatrix4fv(redFlashProg->getUniform("model"), 1, GL_FALSE, value_ptr(model));
-		glUniform4fv(redFlashProg->getUniform("color"), 1, value_ptr(currentColorFilter)); // Red color
 
 		healthBar->Draw(redFlashProg);
 		redFlashProg->unbind();
@@ -6127,8 +6000,16 @@ public:
 			particleAlphaTex->unbind();
 			particleProg->unbind();
 		}
-		glDisable(GL_DEPTH_TEST);
-		drawColorFilter();
+
+		if (Config::DRAW_HEALTHBAR) { // Draw the health bar
+			//cout << "Drawing healthbar" << endl;
+			drawHealthBar();
+			drawEnemyHealthBars(View->topMatrix(), Projection->topMatrix());
+
+			if (bossfightstarted && !bossfightended) {
+				drawBossHealthBar(View->topMatrix(), Projection->topMatrix(), static_cast<float>(width), static_cast<float>(height));
+			}
+		}
 
 		if (Config::DRAW_PLAYER_DAMAGE && player->getDamageTimer() > 0.0f) {
 			player->setDamageTimer(player->getDamageTimer() - frametime);
@@ -6139,7 +6020,6 @@ public:
 
 			drawDamageIndicator(alpha);
 		}
-
 		else if (Config::DRAW_PLAYER_DAMAGE && !player->isAlive() && !debugCamera) {
 			// If player is dead, show red flash
 			movingForward = false;
@@ -6147,18 +6027,6 @@ public:
 			movingLeft = false;
 			movingRight = false;
 			drawDamageIndicator(1.0f);
-		}
-
-		glEnable(GL_DEPTH_TEST);
-
-		if (Config::DRAW_HEALTHBAR) { // Draw the health bar
-			//cout << "Drawing healthbar" << endl;
-			drawHealthBar();
-			drawEnemyHealthBars(View->topMatrix(), Projection->topMatrix());
-
-			if (bossfightstarted && !bossfightended) {
-				drawBossHealthBar(View->topMatrix(), Projection->topMatrix(), static_cast<float>(width), static_cast<float>(height));
-			}
 		}
 
 		// Needs to be before MiniMap rendering
@@ -6356,37 +6224,37 @@ public:
 				string spellName = "";
 
 				if (currentSpellSlotIndex == 0) {
-					spellName = "Lightning Bolt";
-				}
-				else if (currentSpellSlotIndex == 1) {
 					spellName = "Fireball";
 				}
-				else if (currentSpellSlotIndex == 2) {
+				else if (currentSpellSlotIndex == 1) {
 					spellName = "Ice Shard";
 				}
+				else if (currentSpellSlotIndex == 2) {
+					spellName = "Lightning Bolt";
+				}
 				else if (currentSpellSlotIndex == 3) {
-					spellName = "Heal Pulse";
+					spellName = "Heal";
 				}
 
-				cout << "Current Spell: " << spellName <<  " Index: " << currentSpellSlotIndex << endl;
+				cout << "Current Spell: " << spellName << endl;
 				currentPlayerSpellType = spellSlots[currentSpellSlotIndex];
 			}
 			else if (key == GLFW_KEY_E && action == GLFW_PRESS) {
 				currentSpellSlotIndex = (currentSpellSlotIndex + 1) % 4;
 				string spellName = "";
 				if (currentSpellSlotIndex == 0) {
-					spellName = "Lightning Bolt";
-				}
-				else if (currentSpellSlotIndex == 1) {
 					spellName = "Fireball";
 				}
-				else if (currentSpellSlotIndex == 2) {
+				else if (currentSpellSlotIndex == 1) {
 					spellName = "Ice Shard";
 				}
-				else if (currentSpellSlotIndex == 3) {
-					spellName = "Heal Pulse";
+				else if (currentSpellSlotIndex == 2) {
+					spellName = "Lightning Bolt";
 				}
-				cout << "Current Spell: " << spellName <<  " Index: " << currentSpellSlotIndex << endl;
+				else if (currentSpellSlotIndex == 3) {
+					spellName = "Heal";
+				}
+				cout << "Current Spell: " << spellName << endl;
 				currentPlayerSpellType = spellSlots[currentSpellSlotIndex];
 			}
 		}
@@ -6409,16 +6277,6 @@ public:
 			canFightboss = true;
 		}
 
-		if (key == GLFW_KEY_P && action == GLFW_PRESS) {
-			unlock = true;
-			canFightboss = true;
-		}
-
-		if (key == GLFW_KEY_V && action == GLFW_PRESS) {
-			// unlock = true;
-			// canFightboss = true;
-			restartGen = true; // Restart the generation
-		}
 		// DodgeRoll with Spacebar
 		if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
 			dodgeRoll();

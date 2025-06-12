@@ -3,8 +3,7 @@ in vec2 TexCoord;
 out vec4 FragColor;
 
 uniform float alpha;
-uniform vec4 color;
 
 void main() {
-    FragColor = color;
+    FragColor = vec4(0.7, 0.1, 0.1, alpha); // Red with fade
 }

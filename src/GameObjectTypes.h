@@ -64,7 +64,6 @@ enum class Material {
     orb_glowing_blue,
 	orb_glowing_red,
 	orb_glowing_yellow,
-    orb_glowing_green,
     grey,
     wood,
     mini_map,
@@ -73,12 +72,7 @@ enum class Material {
     red_body,
     yellow_body,
     gold,
-    player_green,
-    key_color,
-    orb_highlight_blue,
-    orb_highlight_red,
-    orb_highlight_yellow,
-    orb_highlight_green
+    key_color
 };
 
 // Helper function to map each <Material> to a base color for particles (or fallback white)
@@ -94,11 +88,6 @@ inline glm::vec3 materialToColor(Material m) {
     case Material::orb_glowing_blue:  return glm::vec3(0.1f, 0.2f, 0.5f);
     case Material::orb_glowing_red:   return glm::vec3(0.5f, 0.1f, 0.1f);
     case Material::orb_glowing_yellow:return glm::vec3(0.5f, 0.4f, 0.1f);
-    case Material::orb_glowing_green: return glm::vec3(0.1f, 0.5f, 0.1f);
-    case Material::orb_highlight_blue: return glm::vec3(0.15f, 0.28f, 0.58f);
-    case Material::orb_highlight_red:  return glm::vec3(0.55f, 0.2f, 0.2f);
-    case Material::orb_highlight_yellow: return glm::vec3(0.6f, 0.5f, 0.2f);
-    case Material::orb_highlight_green: return glm::vec3(0.1f, 0.8f, 0.1f);
     case Material::grey:              return glm::vec3(0.8f);
     case Material::wood:              return glm::vec3(0.65f, 0.45f, 0.25f);
     case Material::mini_map:          return glm::vec3(0.65f, 0.45f, 0.25f);
@@ -229,7 +218,7 @@ public:
             orbColor = Material::orb_glowing_yellow;
             break;
         case SpellType::HEAL:
-            orbColor = Material::orb_glowing_green; // Example color for healing
+            orbColor = Material::red_body; // Example color for healing
             break;
         default:
             orbColor = Material::defaultMaterial;
@@ -375,6 +364,7 @@ public:
         }
     }
 };
+
 enum class GameState {
     TITLE_SCREEN,
     IN_GAME,
@@ -391,7 +381,4 @@ struct LocksOnDoor {
     bool animDone = false; // Whether the unlock animation is done
     int keyIndex = -1; // Index of the key used to unlock the door
     bool playUnlockSound = false; // Whether to play the unlock sound
-
-struct ColorFilter {
-    std::string name;
-    glm::vec4 tintColor; // RGB + optional alpha
+};

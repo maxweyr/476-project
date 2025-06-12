@@ -50,7 +50,7 @@ void LibraryGen::generate(glm::ivec2 size, glm::vec3 worldOrigin, glm::vec3 spaw
 
     placeClusters(numberOfClusters);
     enemySpawnPositions.clear(); // Clear any existing enemy spawn positions
-    placeEnemies(numEnemies); // Place enemies in the library
+    placeEnemies(Config::NUM_ENEMIES); // Place enemies in the library
 
     std::cout << "Placed " << clusterCenters.size() << " clusters." << std::endl;
 
@@ -308,13 +308,13 @@ void LibraryGen::placeClusters(int count) {
     }
 }
 
-void LibraryGen::placeEnemies(int num_enemies) {
+void LibraryGen::placeEnemies(int numEnemies) {
     int gridWidth = grid.getSize().x;
 int gridHeight = grid.getSize().y;
 
 // Calculate how many rows and cols of sectors to create
-int sectorCols = std::ceil(std::sqrt(num_enemies));
-int sectorRows = std::ceil(float(num_enemies) / sectorCols);
+int sectorCols = std::ceil(std::sqrt(numEnemies));
+int sectorRows = std::ceil(float(numEnemies) / sectorCols);
 
 int sectorWidth = gridWidth / sectorCols;
 int sectorHeight = gridHeight / sectorRows;
@@ -322,8 +322,8 @@ int sectorHeight = gridHeight / sectorRows;
 vector<glm::ivec2> enemyPos; // Vector to store enemy positions
 
 int placed = 0;
-for (int row = 0; row < sectorRows && placed < num_enemies; ++row) {
-    for (int col = 0; col < sectorCols && placed < num_enemies; ++col) {
+for (int row = 0; row < sectorRows && placed < numEnemies; ++row) {
+    for (int col = 0; col < sectorCols && placed < numEnemies; ++col) {
         // Sector bounds
         int xStart = col * sectorWidth;
         int xEnd = std::min((col + 1) * sectorWidth - 1, gridWidth - 1);
@@ -342,23 +342,19 @@ for (int row = 0; row < sectorRows && placed < num_enemies; ++row) {
 
             bool valid = true;
 
-            // if (grid[pos].type == CellType::SPAWN ||
-            //     grid[pos].type == CellType::ENEMY_SPAWN ||
-            //     grid[pos].type == CellType::BORDER) {
-            //     valid = false;
-            // }
-
-            if (grid[pos].type == CellType::BORDER) {
+            if (grid[pos].type == CellType::SPAWN ||
+                grid[pos].type == CellType::ENEMY_SPAWN ||
+                grid[pos].type == CellType::BORDER) {
                 valid = false;
             }
 
-            // if (glm::distance(glm::vec2(pos), glm::vec2(spawnPosinGrid)) < 4.0f) {
-            //     valid = false;
-            // }
+            if (glm::distance(glm::vec2(pos), glm::vec2(spawnPosinGrid)) < 4.0f) {
+                valid = false;
+            }
 
             if (valid) {
                 enemyPos.push_back(pos);
-                // grid[pos] = Cell(CellType::ENEMY_SPAWN);
+                grid[pos] = Cell(CellType::ENEMY_SPAWN);
                 std::cout << "Placed enemy at: " << pos.x << ", " << pos.y << std::endl;
                 placedInSector = true;
                 placed++;
@@ -366,33 +362,6 @@ for (int row = 0; row < sectorRows && placed < num_enemies; ++row) {
         }
     }
 }
-
-// Fallback: Place any remaining enemies globally
-// while (placed < num_enemies) {
-//     std::uniform_int_distribution<int> distX(0, gridWidth - 1);
-//     std::uniform_int_distribution<int> distY(0, gridHeight - 1);
-
-//     glm::ivec2 pos{distX(seedGen), distY(seedGen)};
-
-//     bool valid = true;
-//     if (grid[pos].type == CellType::SPAWN ||
-//         grid[pos].type == CellType::ENEMY_SPAWN ||
-//         grid[pos].type == CellType::BORDER) {
-//         valid = false;
-//     }
-
-//     if (glm::distance(glm::vec2(pos), glm::vec2(spawnPosinGrid)) < 4.0f) {
-//         valid = false;
-//     }
-
-//     if (valid) {
-//         enemyPos.push_back(pos);
-//         grid[pos] = Cell(CellType::ENEMY_SPAWN);
-//         std::cout << "[Fallback] Placed enemy at: " << pos.x << ", " << pos.y << std::endl;
-//         placed++;
-//     }
-// }
-
 
 
     for (const auto& pos : enemyPos) {
@@ -520,11 +489,6 @@ void LibraryGen::triangulateClusters() {
     }
 
     std::cout << "Selected " << selectedEdges.size() << " edges for path generation." << std::endl;
-}
-
-void LibraryGen::setNumEnemies(int num_enemies) {
-    this->numEnemies = num_enemies; // Set the number of enemies to place in the library
-    std::cout << "Number of enemies set to: " << num_enemies << std::endl;
 }
 
 // void LibraryGen::generatePaths() {
