@@ -171,6 +171,7 @@ public:
 	AssimpModel *border, *lock, *lockHandle, *key;
 	AssimpModel *bookCover, *bookPaper;
 	AssimpModel *stoneGolem;
+	AssimpModel* slimeGuy;
 	AssimpModel *door_rig, *exit_door_rig;
 	Animation *door_open, *door_close, *exit_door_open;
 	Animator *door_animator, *exit_door_animator;
@@ -1586,6 +1587,9 @@ public:
 		stoneGolem = new AssimpModel(resourceDirectory + "/StoneGolem/Stone.obj");
 		stoneGolem->assignTexture("texAlbedo", resourceDirectory + "/StoneGolem/textures/diffuso.tif");
 
+		slimeGuy = new AssimpModel(resourceDirectory + "/SlimeGuy/SlimeGuy.fbx");
+		slimeGuy->assignTexture("texAlbedo", resourceDirectory + "/SlimeGuy/textures/PurpleGuyTex.png");
+
 		door_rig = new AssimpModel(resourceDirectory + "/cluster_assets/door/door_anim.dae");
 		door_rig->assignTexture("texture_diffuse", resourceDirectory + "/cluster_assets/door/Door_diffuse.png");
 
@@ -1625,7 +1629,7 @@ public:
 		vec3 bossSpawnPos = bossRoom->getWorldOrigin();
 
 		initEnemies();
-		bossEnemy = new BossEnemy(bossSpawnPos, BOSS_HP_MAX, stoneGolem, vec3(1.3f, 0.8f, 1.0f), vec3(0, 1, 0), BOSS_SPECIAL_ATTACK_COOLDOWN, SpellType::ICE);
+		bossEnemy = new BossEnemy(bossSpawnPos, BOSS_HP_MAX, slimeGuy, vec3(1.3f, 0.8f, 1.0f), vec3(0, 1, 0), BOSS_SPECIAL_ATTACK_COOLDOWN, SpellType::ICE);
 
 		initTextQuad();
     
@@ -3494,14 +3498,14 @@ public:
 				{
 					// Model->translate(bossPos);
 					// Scale for pill shape ( taller in Y, squished in X/Z )
-					Model->scale(glm::vec3(0.5f, bodyBaseScaleY * 1.6f, 0.5f)); // Adjust scale factors as needed
+					Model->scale(glm::vec3(0.01f, 0.1f, 0.01f)); // Adjust scale factors as needed
 
 					// Set body material
-					SetMaterial(shader, Material::purple);
+					SetMaterial(shader, Material::eye_white);
 
 					setModel(shader, Model);
 					// sphere->Draw(shader); // Draw the scaled sphere as the body
-					stoneGolem->Draw(shader); // Use the stone golem model for the body
+					slimeGuy->Draw(shader); // Use the stone golem model for the body
 				}
 				Model->popMatrix();
 
