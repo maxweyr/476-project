@@ -186,7 +186,9 @@ public:
 
 	AssimpModel* player_rig;
 	Animation *player_walk, *player_idle, *player_roll, *player_grab_book;
+	Animation* slime_idle, *slime_jump;
 	Animator *catwizard_animator;
+	Animator* slime_animator;
 
 	AssimpModel *CatWizard;
 
@@ -1496,7 +1498,7 @@ public:
 
 	}
 
-	void initGeom(const std::string& resourceDirectory) { // NOTE: PROBLEMS GETTING ANIMATION FROM "Fixed" FBX
+	void initGeom(const std::string& resourceDirectory) {
 		string errStr;
 
 		// load the walking character moded
@@ -1589,6 +1591,12 @@ public:
 
 		slimeGuy = new AssimpModel(resourceDirectory + "/SlimeGuy/SlimeGuy.fbx");
 		slimeGuy->assignTexture("texAlbedo", resourceDirectory + "/SlimeGuy/textures/PurpleGuyTex.png");
+
+		//Getting Slime animations
+		slime_idle = new Animation(resourceDirectory + "/CatWizard/CatWizardAnimation4.fbx", player_rig, 0);
+		slime_jump = new Animation(resourceDirectory + "/CatWizard/CatWizardAnimation4.fbx", player_rig, 1);
+		
+		slime_animator = new Animator(slime_jump);
 
 		door_rig = new AssimpModel(resourceDirectory + "/cluster_assets/door/door_anim.dae");
 		door_rig->assignTexture("texture_diffuse", resourceDirectory + "/cluster_assets/door/Door_diffuse.png");
@@ -2368,6 +2376,7 @@ public:
 			cerr << "Error: Null pointer in drawPlayer." << endl;
 			return;
 		}
+		//
 		curS->bind();
 
 		if ((movingBackward || movingForward || movingLeft || movingRight) && !grabbingBook && !rolling) {
@@ -3463,8 +3472,8 @@ public:
 		shader->unbind();
 	}
 
-	void drawBossEnemy(shared_ptr<Program> shader, shared_ptr<MatrixStack> Model) {
-		if (!shader || !Model || !bossEnemy) return; // Need boss enemy model
+	void drawBossEnemy(shared_ptr<Program> shader, shared_ptr<MatrixStack> Model, float animTime) {
+		if (!shader || !Model || !bossEnemy || !slime_animator || !slime_idle || !slime_jump) return; // Need boss enemy model
 
 		shader->bind(); // Use prog2 for simple colored shapes
 
@@ -3473,19 +3482,38 @@ public:
 		glm::vec3 eyeWhiteColor = glm::vec3(1.0f, 1.0f, 1.0f);
 		glm::vec3 eyePupilColor = glm::vec3(0.1f, 0.1f, 0.1f);
 
-		// --- Common Eye Parameters ---
-		float bodyBaseScaleY = 0.8f; // Base height factor before pill stretch
-		glm::vec3 eyeOffsetBase = glm::vec3(0.0f, bodyBaseScaleY * 0.4f, 0.45f); // Y up, Z forward from body center
-		float eyeSeparation = 0.25f; // Distance between eye centers
-		float whiteScale = 0.18f;
-		float pupilScale = 0.1f;
-		float pupilOffsetForward = 0.02f; // Push pupil slightly in front of white
+		//// --- Common Eye Parameters ---
+		//float bodyBaseScaleY = 0.8f; // Base height factor before pill stretch
+		//glm::vec3 eyeOffsetBase = glm::vec3(0.0f, bodyBaseScaleY * 0.4f, 0.45f); // Y up, Z forward from body center
+		//float eyeSeparation = 0.25f; // Distance between eye centers
+		//float whiteScale = 0.18f;
+		//float pupilScale = 0.1f;
+		//float pupilOffsetForward = 0.02f; // Push pupil slightly in front of white
 
 		if (bossEnemy->isAlive() && unlock) {
 			bossEnemy->lookAtPlayer(player->getPosition()); // Make the boss look at the player
 			glm::vec3 bossPos = bossEnemy->getPosition() + glm::vec3(0, 0, 0); // Position the boss slightly above the ground
 			glm::vec3 bossRotation = bossEnemy->getRotation(); // Get rotation from the enemy object
 			float bossRotY = bossEnemy->getRotY();
+
+			//Set animation
+			slime_animator->SetCurrentAnimation(slime_jump);
+
+			if (animTime != 0.0) {
+				slime_animator->UpdateAnimation(animTime);
+			}
+
+			// Update bone matrices
+			vector<glm::mat4> transforms = slime_animator->GetFinalBoneMatrices();
+
+
+			if (shader->hasUniform("finalBonesMatrices[0]")) {
+				int numBones = std::min((int)transforms.size(), Config::MAX_BONES);
+				for (int i = 0; i < numBones; ++i) {
+					string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";
+					glUniformMatrix4fv(shader->getUniform(uniformName), 1, GL_FALSE, value_ptr(transforms[i]));
+				}
+			}
 
 			Model->pushMatrix();
 			{
@@ -3498,88 +3526,18 @@ public:
 				{
 					// Model->translate(bossPos);
 					// Scale for pill shape ( taller in Y, squished in X/Z )
-					Model->scale(glm::vec3(0.01f, 0.1f, 0.01f)); // Adjust scale factors as needed
+					Model->scale(glm::vec3(0.01f, 0.01f, 0.01f)); // Adjust scale factors as needed
 
 					// Set body material
 					SetMaterial(shader, Material::eye_white);
-
-					setModel(shader, Model);
-					// sphere->Draw(shader); // Draw the scaled sphere as the body
-					slimeGuy->Draw(shader); // Use the stone golem model for the body
+					if (shader->hasUniform("hasBones")) glUniform1i(shader->getUniform("hasBones"), GL_TRUE);
+						setModel(shader, Model);
+						// sphere->Draw(shader); // Draw the scaled sphere as the body
+						slimeGuy->Draw(shader); // Use the stone golem model for the body
+					if (shader->hasUniform("hasBones")) glUniform1i(shader->getUniform("hasBones"), GL_FALSE);
 				}
 				Model->popMatrix();
 
-
-				// --- Draw Eyes (Relative to Enemy Center) ---
-
-				// Set Eye Materials Once
-				// White Material Setup (done inside loop per part for clarity now)
-				// Black Material Setup (done inside loop per part for clarity now)
-
-				// // Left Eye
-				// Model->pushMatrix();
-				// {
-				// 	// Go to enemy center, then offset to eye position
-				// 	// Model->translate(bossPos);
-				// 	Model->translate(eyeOffsetBase + glm::vec3(-eyeSeparation, 0, 0));
-
-				// 	// White Part
-				// 	Model->pushMatrix();
-				// 	{
-				// 		Model->scale(glm::vec3(whiteScale));
-				// 		// Set white material
-				// 		SetMaterial(shader, Material::eye_white);
-				// 		setModel(shader, Model);
-				// 		sphere->Draw(shader);
-				// 	}
-				// 	Model->popMatrix(); // Pop white scale
-
-				// 	// Pupil Part
-				// 	Model->pushMatrix();
-				// 	{
-				// 		// Move slightly forward from white surface and scale down
-				// 		Model->translate(glm::vec3(0, 0, whiteScale * 0.5f + pupilOffsetForward)); // Offset relative to white scale
-				// 		Model->scale(glm::vec3(pupilScale));
-				// 		// Set black material
-				// 		SetMaterial(shader, Material::black);
-				// 		setModel(shader, Model);
-				// 		sphere->Draw(shader);
-				// 	}
-				// 	Model->popMatrix(); // Pop pupil transform
-				// }
-				// Model->popMatrix(); // Pop left eye transform
-
-
-				// // Right Eye (Similar to Left)
-				// Model->pushMatrix();
-				// {
-				// 	// Model->translate(bossPos);
-				// 	Model->translate(eyeOffsetBase + glm::vec3(+eyeSeparation, 0, 0)); // Offset to the right
-
-				// 	// White Part
-				// 	Model->pushMatrix();
-				// 	{
-				// 		Model->scale(glm::vec3(whiteScale));
-				// 		// Set white material
-				// 		SetMaterial(shader, Material::eye_white);
-				// 		setModel(shader, Model);
-				// 		sphere->Draw(shader);
-				// 	}
-				// 	Model->popMatrix();
-
-				// 	// Pupil Part
-				// 	Model->pushMatrix();
-				// 	{
-				// 		Model->translate(glm::vec3(0, 0, whiteScale * 0.5f + pupilOffsetForward));
-				// 		Model->scale(glm::vec3(pupilScale));
-				// 		// Set black material
-				// 		SetMaterial(shader, Material::black);
-				// 		setModel(shader, Model);
-				// 		sphere->Draw(shader);
-				// 	}
-				// 	Model->popMatrix();
-				// }
-				// Model->popMatrix(); // Pop right eye transform
 			}
 			Model->popMatrix(); // Pop boss body transform
 		}
@@ -5927,7 +5885,7 @@ public:
 	}
 
 	// Draw the scene for shadow map generation (Draw only shadow-casting objects) (First Pass)
-	void drawSceneForShadowMap(shared_ptr<Program>& prog) {
+	void drawSceneForShadowMap(shared_ptr<Program>& prog, float animTime) {
 		auto Model = make_shared<MatrixStack>();
 		drawBorderWalls(prog, Model); // Draw the borders
 
@@ -5984,7 +5942,7 @@ public:
 
 
 
-		drawBossEnemy(prog, Model);
+		drawBossEnemy(prog, Model, animTime);
 	}
 
 	// Draw the scene with shadows (Second Pass)
@@ -6063,7 +6021,7 @@ public:
 
 		//drawKey(prog2, Model);
 
-		drawBossEnemy(prog, Model);
+		drawBossEnemy(prog, Model, animTime);
 	}
 
 	void occlusionQuery(const shared_ptr<Program>& shader, shared_ptr<MatrixStack>& Model) {
@@ -6720,7 +6678,7 @@ public:
 			glUniformMatrix4fv(DepthProg->getUniform("LV"), 1, GL_FALSE, value_ptr(LV));
 
 			CULL = false;
-			drawSceneForShadowMap(DepthProg); // Draw the scene from the lights perspective
+			drawSceneForShadowMap(DepthProg, animTime); // Draw the scene from the lights perspective
 			CULL = true;
 
 			DepthProg->unbind();
@@ -6758,7 +6716,7 @@ public:
 				DepthProgDebug->bind();
 				glUniformMatrix4fv(DepthProg->getUniform("LP"), 1, GL_FALSE, value_ptr(LO));
 				glUniformMatrix4fv(DepthProg->getUniform("LV"), 1, GL_FALSE, value_ptr(LV));
-				drawSceneForShadowMap(DepthProgDebug); // Draw the scene from the lights perspective for debugging
+				drawSceneForShadowMap(DepthProgDebug, animTime); // Draw the scene from the lights perspective for debugging
 				DepthProgDebug->unbind();
 			}
 			else { // Draw the depth map texture to a quad for visualization
@@ -7014,7 +6972,7 @@ public:
 				drawBossRoom(ShadowProg, Model, false, animTime);
 #endif
 				// drawLibInstancing(ShadowProg, false); // Draw the library shelves without culling
-				drawBossEnemy(ShadowProg, Model);
+				drawBossEnemy(ShadowProg, Model, animTime);
 				// drawOrbs(prog2, Model);
 				drawMiniPlayer(ShadowProg, Model);
 				drawBorderWalls(ShadowProg, Model);
@@ -7074,7 +7032,7 @@ public:
 				drawBossExitDoor(ShadowProg, Model, false, 0.0); // Draw the boss exit door
 				#endif
 				// drawLibInstancing(ShadowProg, false); // Draw the library shelves without culling
-				drawBossEnemy(ShadowProg, Model);
+				drawBossEnemy(ShadowProg, Model, animTime);
 				// drawOrbs(prog2, Model);
 				drawMiniPlayer(ShadowProg, Model);
 				drawBorderWalls(ShadowProg, Model);
