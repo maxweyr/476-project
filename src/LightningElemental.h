@@ -1,5 +1,6 @@
 #include "Enemy.h"
 #include "Config.h"
+#include "Bezier.h"
 
 class LightningElemental : public Enemy {
 
@@ -8,4 +9,11 @@ class LightningElemental : public Enemy {
 
         void moveTowardsPlayer(const glm::vec3& playerPosition, float deltaTime) override;
         void update(Player* player, float deltaTime) override;
-};
+        void LightningElemental::tpInterp(float deltaTime);
+
+        glm::vec3 newPosition;
+        glm::vec3 startPosition;
+        float teleport_timing;
+        float teleport_clock;
+
+        };
