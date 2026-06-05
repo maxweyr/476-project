@@ -44,7 +44,7 @@ namespace Config {// --- Global Game Settings (Config::<thing you want>)---
     // Game Elements --- should be set to true to enable drawing of the system
     constexpr bool DRAW_PARTICLES = true;
     constexpr bool DRAW_HEALTHBAR = true;
-	constexpr bool DRAW_MINIMAP = false;
+	constexpr bool DRAW_MINIMAP = true;
     constexpr bool DRAW_PLAYER_DAMAGE = true;
     constexpr bool DRAW_PAW_PRINTS = true;
 
