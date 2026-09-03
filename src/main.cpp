@@ -3653,9 +3653,10 @@ public:
 		// }
 		if (shader->hasUniform("hasBones")) glUniform1i(shader->getUniform("hasBones"), GL_TRUE);
 		if (shader->hasUniform("texOnly")) glUniform1i(shader->getUniform("texOnly"), GL_TRUE);
+		SetMaterial(shader, Material::brown);
 		setModel(shader, Model);
-		door_rig->Draw(shader); // Use the door model for the entrance
 		if (shader->hasUniform("texOnly")) glUniform1i(shader->getUniform("texOnly"), GL_FALSE);
+		door_rig->Draw(shader); // Use the door model for the entrance
 		if (shader->hasUniform("hasBones")) glUniform1i(shader->getUniform("hasBones"), GL_FALSE);
 		Model->popMatrix();
 		}
